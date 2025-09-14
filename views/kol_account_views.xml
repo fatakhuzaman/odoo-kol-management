@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="kol_account_view_form" model="ir.ui.view">
+        <field name="name">kol.account.view.form</field>
+        <field name="model">kol.account</field>
+        <field name="arch" type="xml">
+            <form string="">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="platform_id"/>
+                        <field name="niche_id"/>
+                        <field name="rate_card" widget="monetary"/>
+                        <field name="contact"/>
+                        <field name="description"/>
+                        <field name="followers" readonly="1"/>
+                        <field name="reach" readonly="1"/>
+                        <field name="er" readonly="1" widget="percentage"/>
+                        <field name="cpe" readonly="1" widget="monetary"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Last Post">
+                            <field name="last_post_ids">
+                                <tree create="false" edit="false" delete="false">
+                                    <field name="post_url" />
+                                    <field name="views" />
+                                    <field name="likes" />
+                                    <field name="comments" />
+                                    <field name="shares" />
+                                    <field name="saves" />
+                                    <field name="post_date" />
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="kol_account_view_tree" model="ir.ui.view">
+        <field name="name">kol.account.view.tree</field>
+        <field name="model">kol.account</field>
+        <field name="arch" type="xml">
+            <tree string="">
+                <field name="name"/>
+                <field name="platform_id"/>
+                <field name="niche_id"/>
+                <field name="rate_card" widget="monetary"/>
+                <field name="contact"/>
+                <field name="followers" readonly="1"/>
+                <field name="reach" readonly="1"/>
+                <field name="er" readonly="1" widget="percentage"/>
+                <field name="cpe" readonly="1" widget="monetary"/>
+                <field name="currency_id" column_invisible="True"/>
+                <button name="action_refetch_apify" type="object" icon="fa-edit" string="Update" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_kol_account" model="ir.actions.act_window">
+        <field name="name">Accounts</field>
+        <field name="res_model">kol.account</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="kol_management_menu" name="KOL" />
+    <menuitem id="account_menu" name="Accounts" action="action_kol_account" parent="kol_management_menu" />
+
+</odoo>

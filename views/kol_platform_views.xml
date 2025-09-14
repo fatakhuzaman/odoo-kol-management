@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="kol_platform_view_form" model="ir.ui.view">
+        <field name="name">kol.platform.view.form</field>
+        <field name="model">kol.platform</field>
+        <field name="arch" type="xml">
+            <form string="">
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="base_url" />
+                        <field name="active" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="kol_platform_view_tree" model="ir.ui.view">
+        <field name="name">kol.platform.view.tree</field>
+        <field name="model">kol.platform</field>
+        <field name="arch" type="xml">
+            <tree string="">
+                <field name="name" />
+                <field name="base_url" />
+                <field name="active" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_kol_platform" model="ir.actions.act_window">
+        <field name="name">Platforms</field>
+        <field name="res_model">kol.platform</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="platforms" name="Platforms" action="action_kol_platform" parent="kol_management_menu" />
+
+</odoo>

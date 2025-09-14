@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="kol_niche_view_form" model="ir.ui.view">
+        <field name="name">kol.niche.view.form</field>
+        <field name="model">kol.niche</field>
+        <field name="arch" type="xml">
+            <form string="">
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="active" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="kol_niche_view_tree" model="ir.ui.view">
+        <field name="name">kol.niche.view.tree</field>
+        <field name="model">kol.niche</field>
+        <field name="arch" type="xml">
+            <tree string="">
+                <field name="name" />
+                <field name="active" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_kol_niche" model="ir.actions.act_window">
+        <field name="name">Niches</field>
+        <field name="res_model">kol.niche</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="niches" name="Niches" action="action_kol_niche" parent="kol_management_menu" />
+
+</odoo>

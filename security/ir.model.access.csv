@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_kol_account,kol.account,model_kol_account,,1,1,1,1
+access_kol_account_last_post,kol.account.last.post,model_kol_account_last_post,,1,1,1,1
+access_kol_niche,kol.niche,model_kol_niche,,1,1,1,1
+access_kol_platform,kol.platform,model_kol_platform,,1,1,1,1
