@@ -11,12 +11,13 @@ class KolAccount(models.Model):
     name = fields.Char(string="Username", required=True)
     platform_id = fields.Many2one('kol.platform', string="Platform", required=True)
     niche_id = fields.Many2many('kol.niche', string="Niche", required=True)
+    niche_names = fields.Char(string="Niches", compute="_compute_niche_names")
     followers = fields.Integer(string="Followers")
     reach = fields.Char(string="Reach")
     currency_id = fields.Many2one('res.currency', string="Currency", default=lambda self: self.env.company.currency_id.id)
     rate_card = fields.Monetary(string="Rate Card", currency_field="currency_id", required=True)
     er = fields.Float(string="ER", help="Engagement Rate")
-    cpe = fields.Monetary(string="CPE", help="Cost Per Engagement", currency_field="currency_id")
+    cpe = fields.Monetary(string="CPE", help="Cost per Engagement", currency_field="currency_id")
     contact = fields.Char(string="Contact", required=True)
     description = fields.Text(string="Description")
     last_post_ids = fields.One2many('kol.account.last.post', 'account_id', string="Last Post")
@@ -35,68 +36,72 @@ class KolAccount(models.Model):
         api_key = self.env['ir.config_parameter'].sudo().get_param('apify.api_key')
         if not api_key:
             raise UserError("Apify API Key is not set. Add it in System Parameters (apify.api_key).")
-        
-        url = f"https://api.apify.com/v2/acts/clockworks~free-tiktok-scraper/run-sync-get-dataset-items?token={api_key}"
-        payload = {
-            "profiles": [self.name],
-            "excludePinnedPosts": True,
-            "resultsPerPage": 10,
-        }
 
-        resp = requests.post(url, json=payload)        
-        data = resp.json()
+        if self.platform_id.name == "Tiktok":
 
-        followers = data[0].get("authorMeta", {}).get("fans", 0)
-        reach = ""
-        if followers >= 10000000:
-            reach = "Super Stars"
-        elif followers >= 1000000:
-            reach = "Mega"
-        elif followers >= 100000:
-            reach = "Macro"
-        elif followers >= 10000:
-            reach = "Micro"
-        elif followers < 10000:
-            reach = "Nano"
-            
-        like = 0
-        comment = 0
-        share = 0
-        save = 0
-        self.last_post_ids.unlink()
-        last_post = []
-        for i in range(len(data)):
-            post = data[i]
-            like += post.get("diggCount", 0)
-            comment += post.get("commentCount", 0)
-            share += post.get("shareCount", 0)
-            save += post.get("collectCount", 0)
+            url = f"https://api.apify.com/v2/acts/clockworks~free-tiktok-scraper/run-sync-get-dataset-items?token={api_key}"
+            payload = {
+                "profiles": [self.name],
+                "excludePinnedPosts": True,
+                "resultsPerPage": 10,
+            }
 
-            post_date = False
-            try:
-                post_date = datetime.strptime(post.get("createTimeISO").replace("Z", ""), "%Y-%m-%dT%H:%M:%S.%f")
-            except ValueError:
+            resp = requests.post(url, json=payload)        
+            data = resp.json()
+
+            followers = data[0].get("authorMeta", {}).get("fans", 0)
+            reach = ""
+            if followers >= 10000000:
+                reach = "Super Stars"
+            elif followers >= 1000000:
+                reach = "Mega"
+            elif followers >= 100000:
+                reach = "Macro"
+            elif followers >= 10000:
+                reach = "Micro"
+            elif followers < 10000:
+                reach = "Nano"
+                
+            like = 0
+            comment = 0
+            share = 0
+            save = 0
+            self.last_post_ids.unlink()
+            last_post = []
+            for i in range(len(data)):
+                post = data[i]
+                like += post.get("diggCount", 0)
+                comment += post.get("commentCount", 0)
+                share += post.get("shareCount", 0)
+                save += post.get("collectCount", 0)
+
+                post_date = False
                 try:
-                    post_date = datetime.strptime(post.get("createTimeISO").replace("Z", ""), "%Y-%m-%dT%H:%M:%S")
-                except Exception:
-                    post_date = False
+                    post_date = datetime.strptime(post.get("createTimeISO").replace("Z", ""), "%Y-%m-%dT%H:%M:%S.%f")
+                except ValueError:
+                    try:
+                        post_date = datetime.strptime(post.get("createTimeISO").replace("Z", ""), "%Y-%m-%dT%H:%M:%S")
+                    except Exception:
+                        post_date = False
 
-            last_post.append((0, 0, {
-                "name": self.name,
-                "post_url": post.get("webVideoUrl"),
-                "views": post.get("playCount", 0),
-                "likes": post.get("diggCount", 0),
-                "comments": post.get("commentCount", 0),
-                "shares": post.get("shareCount", 0),
-                "saves": post.get("collectCount", 0),
-                "post_date": post_date, 
-            }))
-            
-        self.followers = followers
-        self.reach = reach
-        self.er = ((like + comment + share + save) / 10) / followers
-        self.cpe = self.rate_card / ((like + comment + share + save) / 10)
-        self.last_post_ids = last_post
+                last_post.append((0, 0, {
+                    "post_url": post.get("webVideoUrl"),
+                    "views": post.get("playCount", 0),
+                    "likes": post.get("diggCount", 0),
+                    "comments": post.get("commentCount", 0),
+                    "shares": post.get("shareCount", 0),
+                    "saves": post.get("collectCount", 0),
+                    "post_date": post_date, 
+                }))
+                
+            self.followers = followers
+            self.reach = reach
+            self.er = ((like + comment + share + save) / 10) / followers
+            self.cpe = self.rate_card / ((like + comment + share + save) / 10)
+            self.last_post_ids = last_post
+
+        else:
+            raise UserError("Sorry, other platforms are not available yet, coming soon.")
 
     def write(self, vals):
         res = super(KolAccount, self).write(vals)
@@ -112,3 +117,9 @@ class KolAccount(models.Model):
                 rec.cpe = rec.rate_card / ((like + comment + share + save) / 10)
         
         return res
+
+    @api.depends("niche_id")
+    def _compute_niche_names(self):
+        for rec in self:
+            rec.niche_names = ", ".join(rec.niche_id.mapped("name")) if rec.niche_id else "-"
+        

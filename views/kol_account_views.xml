@@ -47,7 +47,7 @@
             <tree string="">
                 <field name="name"/>
                 <field name="platform_id"/>
-                <field name="niche_id"/>
+                <field name="niche_id" widget="many2many_tags"/>
                 <field name="rate_card" widget="monetary"/>
                 <field name="contact"/>
                 <field name="followers" readonly="1"/>

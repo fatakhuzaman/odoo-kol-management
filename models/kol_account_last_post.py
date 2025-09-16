@@ -4,7 +4,7 @@ class KolAccount(models.Model):
     _name = "kol.account.last.post"
     _description = "KOL Account Last Post"
 
-    name = fields.Char(string="Username", required=True)
+    account_id = fields.Many2one("kol.account", string="Account", required=True)
     post_url = fields.Char(string="Post URL")
     views = fields.Integer(string="Views")
     likes = fields.Integer(string="Likes")
@@ -12,4 +12,3 @@ class KolAccount(models.Model):
     shares = fields.Integer(string="Shares")
     saves = fields.Integer(string="Saves")
     post_date = fields.Datetime(string="Post Date")
-    account_id = fields.Many2one("kol.account", string="Account", required=True)
