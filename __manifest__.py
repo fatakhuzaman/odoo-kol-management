@@ -5,7 +5,10 @@
     "website": "fatakhuzaman.com",
     "category": "Uncategorized",
     "version": "1.0.0",
-    "depends": ["base"],
+    "depends": [
+        "base",
+        'queue_job',    
+    ],
     "data": [
         "security/ir.model.access.csv",
         "views/kol_account_views.xml",

@@ -1,8 +1,8 @@
 import requests
+from datetime import datetime
 
 from odoo import models, fields, api
 from odoo.exceptions import UserError
-from datetime import datetime
 
 class KolAccount(models.Model):
     _name = "kol.account"
@@ -25,14 +25,20 @@ class KolAccount(models.Model):
     @api.model
     def create(self, vals_list):
         record = super(KolAccount, self).create(vals_list)
-        record._fetch_apify()
+        record.with_delay(
+            description=f"Fetch data for {record.name}"
+        )._fetch_apify()
         return record
 
     def action_refetch_apify(self):
-        for rec in self:
-            rec._fetch_apify()
+        for record in self:
+            record.with_delay(
+                description=f"Fetch data for {record.name}"
+            )._fetch_apify()
+        return True
 
     def _fetch_apify(self):
+        self.ensure_one()
         api_key = self.env['ir.config_parameter'].sudo().get_param('apify.api_key')
         if not api_key:
             raise UserError("Apify API Key is not set. Add it in System Parameters (apify.api_key).")
@@ -62,12 +68,10 @@ class KolAccount(models.Model):
             elif followers < 10000:
                 reach = "Nano"
                 
-            like = 0
-            comment = 0
-            share = 0
-            save = 0
+            like = comment = share = save = 0
             self.last_post_ids.unlink()
             last_post = []
+            
             for i in range(len(data)):
                 post = data[i]
                 like += post.get("diggCount", 0)
