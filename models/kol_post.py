@@ -1,14 +1,14 @@
 import requests
+from datetime import datetime
 
 from odoo import models, fields, api
 from odoo.exceptions import UserError
-from datetime import datetime
 
 class KolPost(models.Model):
     _name = "kol.post"
     _description = "KOL Post"
 
-    name = fields.Many2one('kol.account', string="Username", required=True)
+    account_id = fields.Many2one('kol.account', string="Account", required=True)
     platform_id = fields.Many2one('kol.platform', string="Platform", required=True)
     currency_id = fields.Many2one('res.currency', string="Currency", default=lambda self: self.env.company.currency_id.id)
     cost = fields.Integer(string="Cost", currency_field="currency_id", required=True)
@@ -29,7 +29,9 @@ class KolPost(models.Model):
     @api.model
     def create(self, vals_list):
         record = super(KolPost, self).create(vals_list)
-        record._fetch_apify()
+        record.with_delay(
+            description=f"Fetch data for {record.account_id.name}"
+        )._fetch_apify()
         return record
 
     def action_refetch_apify(self):
